@@ -201,7 +201,7 @@ for(i in 1:1000){
 report_mean_and_sd <- function(numbers){
   m <- mean(numbers)
   s <- sd(numbers)
-  report <- paste("mean is ", m, " and sd is ", round(s, 2))
+  report <- paste("mean is ", m, " and sd is ", round(s, 5))
   return(report)
 }
 
@@ -212,6 +212,41 @@ report_mean_and_sd(1:10)
 # mean of 10, sd of 2
 # return text "the average of the distributions is ...." rounded to 4 decimal points
 
-report_results <- function(n_observations){
-  
+report_results <- function(n_observations = 100){
+  sample <- rnorm(n_observations, 10, 2)
+  avg <- mean(sample)
+  report <- paste("the average of the distribution is", round(avg, 4))
+  return(report)
 }
+
+report_results(100000)
+report_results()
+
+report_results <- function(n_observations = 100){
+  sample <- rnorm(n_observations, 10, 2)
+  report <- report_mean_and_sd(sample)
+  return(report)
+}
+
+report_results()
+
+
+# APPLY functions -------
+for(i in 1:10){
+  print(i ^ 2)
+}
+
+sapply(1:10, function(x){x ^ 2})
+
+letters
+sapply(letters, toupper)
+sapply(letters, function(x){toupper(x)})
+
+sapply(iris, mean)
+sapply(iris, is.numeric)
+
+
+sapply(iris, function(x){if(is.numeric(x))report_mean_and_sd(x)})
+
+?apply
+
