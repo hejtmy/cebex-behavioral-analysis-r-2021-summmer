@@ -1,4 +1,5 @@
 # There should be always clear way from raw data to final
+library(dplyr)
 source("functions/load-movies.R")
 df_movies <- load_movies(500)
 
@@ -111,17 +112,71 @@ grepl("p", "apple")
 grep("a", c("apple", "car"))
 grep("p", c("apple", "car"))
 
-df_movies %>%
-  mutate(is_comedy = .....,
-         is_romance = .....,
-         is_action = ........,
-         is_drama = .......,
-         is_family = ......)
+df_movies <- df_movies %>%
+  mutate(is_comedy = grepl("Comedy", genres, ignore.case = TRUE),
+         is_romance = grepl("Romance", genres, ignore.case = TRUE),
+         is_action = grepl("Action", genres, ignore.case = TRUE),
+         is_drama = grepl("Drama", genres, ignore.case = TRUE),
+         is_family = grepl("Family", genres, ignore.case = TRUE))
 
 ## gsub
+gsub("Comedy", "fun", c("Comedy", "Drama", "Family", "Comedy"))
+
+df_movies$genres[1]
+gsub("\\[", "", df_movies$genres[1])
+gsub("\\{", "", df_movies$genres[1])
+
+#? REGULAR EXPRESSIONS
+gsub("'id': \\d+", "", df_movies$genres[1])
+gsub("'id': \\d+, 'name': ", "", df_movies$genres[1])
+
 
 ## separate
+library(tidyr)
+
+df <- data.frame(x = c(NA, "a.b", "a.d", "b.c"), stringsAsFactors = FALSE)
+df %>% separate(x, c("A", "B"))
+
+df_movies %>% 
+  separate(release_date, c("year", "month", "day"), sep = "-") %>%
+  head()
+
+df_movies %>% 
+  separate(release_date, c("year", "month", "day"), sep = "-", remove = FALSE) %>%
+  glimpse()
+
+df_movies %>% 
+  separate(release_date, c("year", "month", "day"), sep = "-", remove = FALSE) %>%
+  mutate(year = as.numeric(year)) %>% glimpse()
+
+df_movies <- df_movies %>% 
+  separate(release_date, c("year", "month", "day"), 
+           sep = "-", convert = TRUE)
+
+df_movies <- load_movies(500)
+df_movies <- process_movies(df_movies)
 
 ## unite
+df_movies %>%
+  unite(release_date, year, month, day, sep = "-") %>%
+  glimpse()
+
+## 
+df_example <- data.frame(ssn = c("2021134mM", "2021138mT"), stringsAsFactors = FALSE)
+df_example %>% 
+  separate(ssn, into = c("year", "day", "month", "gender", "weight"),
+                        sep = c(4, 6, 7, 8)) %>%
+  head()
+
+data.frame(ssn = c("26267", "25487"), stringsAsFactors = FALSE) %>%
+  separate(ssn, into=c("gender", "weight", "color", "bodytype", "personality"),
+           sep = (1:4)) %>%
+  mutate(gender = recode(gender, "1"="boy", "2"="girl", "3"="other", .default = "missing"))
+# create a new colum name european_date
+# day.month.year
+
+
+# RESHAPING -------
+
 
 # Scaling -----
