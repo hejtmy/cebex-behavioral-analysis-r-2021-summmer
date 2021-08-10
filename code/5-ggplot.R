@@ -110,3 +110,99 @@ hist(df_movies$budget, breaks = 25)
 ggplot(df_movies, aes(budget)) + geom_histogram(bins = 50)
 
 ## Boxplots ----
+
+# Create a boxplot of revenues of movies with non 0 budgets
+# color it by year
+library(ggplot2)
+# Top Right: Set a different color for each group
+df_movies %>%
+  filter(budget > 0, year > 1980) %>%
+  mutate(year = factor(year)) %>%
+  ggplot(aes(x=year, y=revenue, fill=year)) + 
+    geom_boxplot(alpha=0.3) +
+    theme(legend.position="none")
+
+ggplot(df_movies, aes(x=factor(year), y=revenue, fill=year)) + 
+  geom_boxplot(alpha=0.3) +
+  theme(legend.position="none")
+
+## For years 2000 and later
+df_movies %>%
+# only where profit is larger than 0
+  filter(year > 1995, profit > 0) %>%
+  mutate(year = factor(year)) %>%
+  # show boxplots of profits
+  ggplot(aes(x=year, y=profit, fill=is_comedy)) +
+  # each year - 2 boxplots next to each other - one comedy, two not comedy
+    geom_boxplot()
+
+## Plot ---------
+source("functions/load-olympics.R")
+df_olympics <- load_olympics(-1)
+df_olympics <- sample_n(df_olympics, 2000)
+
+glimpse(df_olympics)
+
+ggplot(df_olympics, aes(Height, Weight)) + 
+  geom_point()
+
+# color it by gender
+ggplot(df_olympics, aes(Height, Weight, color=Sex)) +
+  geom_point() +
+  facet_wrap(~Sex)
+
+# separate for gold and silver medalists
+df_olympics %>%
+  filter(Medal >= "Silver") %>%
+  ggplot(aes(Height, Weight, color=Sex)) +
+    geom_point() +
+    facet_wrap(~Medal)
+
+df_olympics %>%
+  filter(Medal >= "Bronze") %>%
+  ggplot(aes(Height, Weight, shape=Season, color=Season)) +
+    geom_point(size = 3)+
+    facet_wrap(~Medal)
+
+df_olympics <- load_olympics(-1)
+df_olympics_small <- sample_n(df_olympics, 5000)
+# select two sports
+sports <- c("Archery", "Canoeing")
+# filter data for these sports
+plt <- df_olympics %>%
+  filter(Sport %in% sports) %>%
+# plot height and width shape = sex, color = Sex
+  ggplot(aes(Height, Weight, shape=Sex, color=Sex))
+
+## Adding linear models predictions
+plt +
+  geom_point(alpha = 0.5) +
+  # separate the graphs based on the sport
+  facet_wrap(~Sport)  + 
+  geom_smooth()
+
+plt +
+  geom_point(alpha = 0.5) +
+  # separate the graphs based on the sport
+  facet_wrap(~Sport)  + 
+  geom_smooth(method="lm")
+
+
+df_olympics_small %>%
+# create a single scatter plot
+  ggplot(aes(Height, Weight, shape=Season, color=Season)) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method="lm")
+# color and give shape to points based on winter/summer olympics
+# fit a linear regression model
+
+## Summative plots -----
+# how many medals did China win in each year -- are they getting better?
+
+df_olympics_small %>%
+  filter(NOC == "CHN") %>%
+  head()
+
+# group_by
+# summarise
+
