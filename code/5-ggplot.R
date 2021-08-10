@@ -203,6 +203,24 @@ df_olympics_small %>%
   filter(NOC == "CHN") %>%
   head()
 
-# group_by
-# summarise
+df_china_medals <- df_olympics %>%
+  filter(NOC == "CHN") %>%
+  group_by(Year, Season) %>%
+  summarise(n_gold = sum(Medal == "Gold", na.rm = TRUE),
+            n_medals = sum(Medal >= "Bronze", na.rm = TRUE))
 
+df_china_medals %>%
+  filter(Season == "Summer") %>%
+  ggplot(aes(Year, n_medals)) + geom_line()
+
+df_china_medals %>%
+  filter(Season == "Winter") %>%
+  ggplot(aes(Year, n_medals)) + geom_line()
+
+df_china_medals %>%
+  ggplot(aes(Year, n_medals, color = Season)) +
+  geom_line() + geom_point(size = 2)
+
+df_china_medals %>%
+  ggplot(aes(Year, n_medals, fill = Season)) +
+  geom_col()
