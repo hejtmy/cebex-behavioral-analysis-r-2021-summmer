@@ -48,8 +48,8 @@ head(select(df_movies, -c(1:10)))
 # readLines - check parameters
 readLines("data/big5/big5-data.csv", 3)
 # load
-df_big5 <- read.table("data/big5/big5-data.csv", nrows = 100, stringsAsFactors = FALSE,
-                      header = TRUE)
+df_big5 <- read.table("data/big5/big5-data.csv", 
+                      nrows = 100, stringsAsFactors = FALSE, header = TRUE)
 
 
 head(select(df_big5, starts_with("E"), -engnat))
@@ -147,6 +147,7 @@ df_movies %>%
 
 ## grouping / aggregations
 df_movies <- load_movies(5000)
+
 df_movies %>%
   group_by(original_language) %>%
   summarise(avg_budget = mean(budget),

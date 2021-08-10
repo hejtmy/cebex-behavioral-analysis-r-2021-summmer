@@ -1,0 +1,4 @@
+# File edits
+
+I have removed the bottom line of the file big5-data.csv as it was recorded with
+errors and has no impact on the final dataset.
