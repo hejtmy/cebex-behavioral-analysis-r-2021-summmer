@@ -92,17 +92,42 @@ str(merge(df_example, df_example_two_ids, by.x = "id",
 View(merge(df_example, df_example_two_ids, by.x = "id", 
           by.y = "participant_id"))
 
-
 # load the ratings
 # load the metadata
-load_movies()
+df_ratings <- read.csv("data/movies/ratings_small.csv")
+df_movies_titles <- load_movies() %>%
+  select(id, original_title)
+
+str(merge(df_ratings, df_movies_titles, by.x="movieId", by.y="id"))
 
 
-# only merge in titles to reviews ()
-# JOINS
+df_merge_all <- merge(df_ratings, df_movies_titles, 
+                      y.x="movieId", by.y="id", all=TRUE)
+str(df_merge_all)
+df_merge_all_ratings <- merge(df_ratings, df_movies_titles, 
+                      by.x="movieId", by.y="id", all.x=TRUE)
+str(df_merge_all_ratings)
+
+# JOINS ------
+
+# left_join => merge(all.x = TRUE)
+df_reviews %>%
+  left_join(df_movies_titles, by=c("movieId" = "id")) %>%
+  head()
 
 
-# left_join
-# inner_join
-# full_join
+# right_join - rare => merge(all.y = TRUE)
+# inner_join => merge()
+df_reviews %>%
+  inner_join(df_movies_titles, by=c("movieId" = "id")) %>%
+  head()
+
+# full_join => merge(all=TRUE)
+df_reviews %>%
+  full_join(df_movies_titles, by=c("movieId" = "id")) %>%
+  head()
+
+## joining can be done on multiple columns
+match_columns <- c("gender", "age", "father_job", "mother_job", "income_group")
+#merge(tab1, tab2, by=match_columns)
 
