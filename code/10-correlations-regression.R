@@ -60,7 +60,6 @@ df_movies %>%
 # check qqplots again
 ## Check the qqplots
 df_movies %>%
-yt
   ggplot(aes(sample=vote_count)) +
     geom_qq() + stat_qq_line()
 
@@ -73,16 +72,13 @@ performance(lm_visits_budget)
 
 ## Log transformations ------
 # filter error values
-# filter
+
+## Plot data
+
+# filter 0 values because of log
+# log transform the data
+
 # scale_x_log10 and scale_y_log10
-df_movies %>%
-  filter(vote_count > 0,
-         budget > 0) %>%
-  ggplot(aes(budget, vote_count)) +
-    geom_point() +
-    geom_smooth(method = "lm") + 
-    scale_x_log10() +
-    scale_y_log10()
 
 ## Transform the data
 
@@ -106,17 +102,22 @@ df_facebook_plt <- sample_n(df_facebook, 2000)
 
 ## do some filtering and transformations
 
-df_facebook <- df_facebook %>%
-  filter(likes > 10, likes_received > 10) %>%
-  mutate(log_likes = log10(likes),
-         log_likes_received = log10(likes_received))
+#df_facebook <- df_facebook %>%
+#  filter(likes > 10, likes_received > 10) %>%
+#  mutate(log_likes = log10(likes),
+#         log_likes_received = log10(likes_received))
 
-df_facebook_plt <- df_facebook_plt %>%
-  filter(likes > 10, likes_received > 10) %>%
-  mutate(log_likes = log10(likes),
-         log_likes_received = log10(likes_received))
+#lm_log_likes_received <- lm(log_likes_received ~ log_likes, data=df_facebook)
+#summary(lm_log_likes_received)
 
-summary(lm(likes_received ~ likes, data = df_facebook))
+#lm_log_likes_received <- lm(log_likes_received ~ log_likes, data=df_facebook)
+#lm_likes_received <- lm(likes_received ~ likes, data=df_facebook)
 
+#compare_performance(lm_log_likes_received, lm_likes_received)
+## Transforming the coefficients back
+#https://medium.com/@kyawsawhtoon/log-transformation-purpose-and-interpretation-9444b4b049c9
+#https://kenbenoit.net/assets/courses/ME104/logmodels2.pdf
+# 10^lm_likes_received$coefficients[1] # if no likes are given, person gets this amount's of likes by default
 
-              
+# 1.1^lm_likes_received$coefficients[2] # for every 10% of increased likes, user gains about 7 percent likes back
+predict(lm_likes_received)
