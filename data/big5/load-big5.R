@@ -1,4 +1,5 @@
-df_big5 <- read.table("data/big5/big5-data.csv", nrows = 100,
+pth <- "data/big5/big5-data.csv"
+df_big5 <- read.table(pth, nrows = 100,
                       stringsAsFactors = FALSE, header = TRUE)
 
 df_big5 <- df_big5 %>%
@@ -7,3 +8,5 @@ df_big5 <- df_big5 %>%
          gender = recode(gender, "1"="male","2"="female","3"="other", .default="missed"),
          english_native = engnat) %>%
   select(-engnat)
+
+rm(pth)
