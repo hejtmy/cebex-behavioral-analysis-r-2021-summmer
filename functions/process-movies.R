@@ -1,5 +1,7 @@
+library(dplyr)
+
 process_movies <- function(df_movies){
-  df_movies<- decode_original_language(df_movies)
+  df_movies <- decode_original_language(df_movies)
   
   df_movies <- df_movies %>%
     mutate(budget = budget/10^6,
@@ -35,7 +37,7 @@ dummy_code_genres <- function(df_movies){
 
 separate_release_date <- function(df_movies){
   df_movies <- df_movies %>% 
-    separate(release_date, c("year", "month", "day"), 
+    tidyr::separate(release_date, c("year", "month", "day"), 
              sep = "-", convert = TRUE)
   return(df_movies)
 }

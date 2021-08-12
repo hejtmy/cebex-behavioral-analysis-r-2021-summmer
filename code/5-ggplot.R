@@ -284,6 +284,8 @@ df_olympics_1990_winter %>%
   group_by(Sport) %>%
   summarise(avg_age = mean(Age, na.rm = TRUE)) %>%
   arrange(avg_age) %>%
-  ggplot(aes(.......))
-# plot columns with these average values in descending order
-# plot the columns horizontally
+  mutate(Sport=factor(Sport, levels=Sport)) %>%
+  ggplot(aes(x=Sport, y=avg_age, fill=Sport)) +
+    geom_col() + 
+    coord_flip()
+
