@@ -165,7 +165,7 @@ df_olympics %>%
     facet_wrap(~Medal)
 
 df_olympics <- load_olympics(-1)
-df_olympics_small <- sample_n(df_olympics, 5000)
+df_olympics_small <- sample_n(df_olympics, 10000)
 # select two sports
 sports <- c("Archery", "Canoeing")
 # filter data for these sports
@@ -224,3 +224,66 @@ df_china_medals %>%
 df_china_medals %>%
   ggplot(aes(Year, n_medals, fill = Season)) +
   geom_col()
+
+### Brief after break recap
+## load entire olympics dataset
+## filter for years after 1990
+## only one season (winter or summer)
+## save this in a dataset df_olympics_1990_winter <- 
+df_olympics_1990_winter <- load_olympics(-1) %>%
+  filter(Year > 1990, Season == "Winter")
+
+## plot just the "top 10" disciplines (average age, number of athletes)
+top_sports <- count(df_olympics_1990_winter, Sport) %>%
+  arrange(-n)
+
+top_sports[1:2,]
+top_sports[1:2, "Sport"]
+top_sports[1:2, ]$Sport
+top_sports$Sport[1:2]
+## using this dataset plot the histogram of age for each discipline separately
+df_olympics_1990_winter %>%
+  # %in%
+  filter(Sport %in% top_sports$Sport[1:10]) %>%
+  ggplot(aes(x=Age, fill=Sport)) + 
+    geom_histogram(binwidth = 1) +
+    facet_wrap(~Sport)
+
+## geom bar --------
+df_olympics_1990_winter %>%
+  ggplot(aes(x=Sport, fill=Sport)) +
+    geom_bar()
+
+## geom col -------
+df_olympics_1990_winter %>%
+  count(Sport) %>%
+  arrange(-n) %>%
+  mutate() %>%
+  ggplot(aes(x=Sport, y=n, fill=Sport)) + geom_col()
+
+fac_top_sports <- factor(top_sports$Sport)
+levels(fac_top_sports)
+
+fac_top_sports <- factor(top_sports$Sport, levels = top_sports$Sport)
+levels(fac_top_sports)
+
+df_olympics_1990_winter %>%
+  count(Sport) %>%
+  arrange(-n) %>%  # First sort by val. This sort the dataframe but NOT the factor levels
+  mutate(Sport=factor(Sport, levels=Sport)) %>%   # This trick update the factor levelso
+  ggplot(aes(x=Sport, y=n, fill=Sport)) +
+    geom_col()
+
+library(forcats)
+#df_olympics_1990_winter %>%
+  #mutate(Sport = fct_reorder(Sport, n(), .fun=))
+
+
+# create new table with average age of each athlete in their discipline
+df_olympics_1990_winter %>%
+  group_by(Sport) %>%
+  summarise(avg_age = mean(Age, na.rm = TRUE)) %>%
+  arrange(avg_age) %>%
+  ggplot(aes(.......))
+# plot columns with these average values in descending order
+# plot the columns horizontally
