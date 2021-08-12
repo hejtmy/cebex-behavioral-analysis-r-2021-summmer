@@ -4,7 +4,7 @@ process_movies <- function(df_movies){
   df_movies <- decode_original_language(df_movies)
   
   df_movies <- df_movies %>%
-    mutate(budget = budget/10^6,
+    mutate(budget = as.numeric(budget)/10^6,
            revenue = revenue/10^6,
             profit = revenue - budget,
             adult = adult == "True",
