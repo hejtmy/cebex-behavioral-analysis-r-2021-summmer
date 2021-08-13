@@ -1,9 +1,6 @@
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-source("code/data-loading-functions.R")
-df_movies <- load_movies_metadata(2500)
-df_movies_complete <- load_movies_metadata()
 
 ## Analysis of variance
 set.seed(666)
@@ -18,41 +15,75 @@ df_example %>% # all groups together
   geom_errorbar(aes(ymax=avg, ymin=avg)) +
   theme(aspect.ratio = 1)
 
+df_example %>% # all groups together
+  pivot_longer(cols = everything()) %>%
+  mutate(avg=mean(value)) %>%
+  ggplot(aes(x=1, y = value, color=name)) + 
+  geom_point(position = position_jitter(0.2)) +
+  geom_errorbar(aes(ymax=avg, ymin=avg)) +
+  theme(aspect.ratio = 1)
+
 df_example %>% #groups separated
   pivot_longer(cols = everything()) %>%
   group_by(name) %>%
   mutate(avg=mean(value)) %>%
   ungroup() %>%
-  ggplot(aes(x = name, y = value, color=value)) + 
+  ggplot(aes(x = name, y = value, color=name)) + 
   geom_point(position = position_jitter(0.2)) +
   geom_errorbar(aes(ymax=avg, ymin=avg)) +
   theme(aspect.ratio = 1)
 
-df_musicians <- df_example %>%
+df_example <- df_example %>%
   pivot_longer(cols = everything(), names_to="musician", values_to="score")
-aov_score_musician <- aov(score ~ musician, data=df_musicians)
+
+aov_score_musician <- aov(score ~ musician, data=df_example)
 summary(aov_score_musician)
+aov_score_musician
 
 ### Post-hoc test
 TukeyHSD(aov_score_musician)
-t.test(df_example$haydn, df_example$bach)
+
+#t.test(df_example$haydn, df_example$bach)
+## Correction for multiple comparisons
+lm_score_musician <- lm(score ~ musician, data=df_example)
+summary(lm_score_musician)
+aov_score_musician
 
 ## Height in sports
 source("functions/load-olympics.R")
+set.seed(201)
 df_olympics <- load_olympics(-1)
-df_olympics <- sample_n(df_olympics, 5000)
+df_olympics <- df_olympics %>%
+  filter(Year > 1990, Season == "Winter") %>%
+  sample_n(df_olympics, 5000)
 
 ## Plot average height in sports
+df_olympics <- df_olympics %>%
+  filter(Year > 1990, Season == "Winter") %>%
+  sample_n(5000)
+
+unique(df_olympics$Sport)
+
+df_olympics %>%
+  ggplot(aes(Height)) + geom_histogram() +
+  facet_wrap(~Sport)
 
 ## Test it with anova
+aov_height_sport <- aov(Height ~ Sport, data=df_olympics)
+summary(aov_height_sport)
+aov_height_sport
+aov_post <- TukeyHSD(aov_height_sport)
+as.data.frame(aov_post$Sport) %>%
+  arrange(`p adj`) %>%
+  mutate(p_sig = `p adj` < 0.01)
 
-## Filter only years 1990
-
-## run again
+lm_height_sport <- lm(Height ~ Sport, data=df_olympics)
+summary(lm_height_sport)
 
 ## Multiple predictors -------
 source("functions/load-olympics.R")
 df_olympics <- load_olympics(-1)
+set.seed(2500)
 df_olympics <- sample_n(df_olympics, 5000)
 table(df_olympics$Sex)
 
@@ -63,7 +94,6 @@ table(df_olympics$Sex)
 # glm for just Height + Sex
 
 # glm for just Height*Sex
-
 
 # compare_performance()
 

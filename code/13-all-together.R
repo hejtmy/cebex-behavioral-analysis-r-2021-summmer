@@ -26,7 +26,6 @@ load_jovi <- function(pth){
 jovi <- load_jovi(pth)
 head(jovi$data)
 
-
 files <- list.files("data/jovi/", full.names = TRUE)
 
 jovi <- data.frame()
