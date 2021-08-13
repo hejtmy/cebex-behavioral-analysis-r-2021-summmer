@@ -167,12 +167,18 @@ df_comparing_family %>%
 t.test(df_comparing_family$family, df_comparing_family$not_family,
        paired = TRUE)
 
-## Non parametric data
+## Non parametric data -----
 hist(df_movies$revenue)
 t.test(revenue~is_family, data=filter(df_movies_complete, revenue > 0)) #wrong, revenue is not normally distributed
 df_movies_complete %>%
   filter(revenue > 0) %>%
   with(cohen.d(revenue ~ factor(is_family)))
 
-wilcox.test(revenue~is_family, data=filter(df_movies_complete, revenue > 0))
+wilcox.test(revenue~is_family,
+            data=filter(df_movies_complete, revenue > 0))
 wilcox.test(revenue~is_drama, data=filter(df_movies_complete, revenue > 0))
+
+wilcox.test(revenue~is_family,
+            data=filter(df_movies, revenue > 0))
+summary(lm(order(revenue)~is_family,
+            data=filter(df_movies, revenue > 0)))

@@ -1,6 +1,98 @@
 pth <- "data/jovi/Jovi4_13.json"
 library(jsonlite)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(report)
 
+names(dat)
+
+head(dat$data, 25)
+
+## REGULAR EXPRESSIONS
+
+load_jovi <- function(pth){
+  dat <- jsonlite::fromJSON(pth)
+  df_jovi <- dat$data %>%
+    extract(image, into=c("jitter"), regex="jit([0-9]+)",
+            remove = FALSE, convert = TRUE) %>%
+    mutate(user_id = dat$id)
+  return(df_jovi)
+}
+
+df <- load_jovi("data/jovi/Jovi4_13.json")
+
+
+jovi <- data.frame()
+for(pth in list.files("data/jovi/", full.names = TRUE)){
+  df <- load_jovi(pth)
+  jovi <- rbind(jovi, df)
+}
+table(jovi$user_id)
+
+table(jovi$user_id, jovi$jitter)
+
+## Reaction times ------
+glimpse(jovi)
+ggplot(jovi, aes(reactionTime)) + 
+  geom_histogram()
+
+jovi_filtered <- jovi %>%
+  filter(reactionTime < 2000)
+
+ggplot(jovi_filtered, aes(reactionTime)) + 
+  geom_histogram()
+
+ggplot(jovi_filtered, aes(reactionTime)) + 
+  geom_histogram() + facet_wrap(~user_id)
+
+summary(jovi_filtered)
+
+jovi_filtered <- jovi_filtered %>%
+  filter(!is.na(jitter), !is.na(correctAnswer))
+
+ggplot(jovi_filtered, aes(sample=reactionTime)) + 
+  geom_qq() + stat_qq_line() + facet_wrap(~jitter)
+
+lm_reaction_jitter <- lm(reactionTime ~ jitter, data = jovi_filtered)
+summary(lm_reaction_jitter)
+lm_reaction_jitter$coefficients["jitter"] * 15
+
+lm_reaction_jitter_correct <- jovi_filtered %>%
+  filter(correctAnswer) %>%
+  with(lm(reactionTime ~ jitter, data = .))
+
+summary(lm_reaction_jitter_correct)
+
+lm_reaction_jitter_correct_inter <- 
+  lm(reactionTime ~ jitter*correctAnswer, data = jovi_filtered)
+summary(lm_reaction_jitter_correct_inter)
+
+compare_performance(lm_reaction_jitter, 
+                    lm_reaction_jitter_correct,
+                    lm_reaction_jitter_correct_inter)
+
+# Linear mixed effect models
+library(lme4)
+library(lmerTest)
+lmer_reaction_jitter <- lmer(reactionTime ~ jitter + (1 | user_id),
+                             data = jovi_filtered)
+
+summary(lmer_reaction_jitter)
+
+ggplot(jovi_filtered, aes(factor(user_id), reactionTime)) + geom_boxplot()
+
+compare_performance(lm_reaction_jitter,
+                    lmer_reaction_jitter)
+
+data.frame()
+
+
+
+
+
+
+## Prep ------
 dat <- fromJSON(pth)
 str(dat)
 head(dat$data)
@@ -12,7 +104,7 @@ txt <- dat$data$image[120]
 dat$data %>%
   extract(image, into=c("jitter"), regex = "jit([0-9]+)",
           remove=FALSE, convert = TRUE) %>%
-  str()
+  View()
 
 load_jovi <- function(pth){
   dat <- fromJSON(pth)
@@ -58,8 +150,6 @@ jovi <- jovi %>%
 
 ggplot(jovi, aes(x = jitter, y=reactionTime, fill=factor(jitter), group=jitter)) +
   geom_boxplot()
-lm_reaction_jitter <- lm(reactionTime ~ jitter, data=jovi)
-summary(lm_reaction_jitter)
 
 jovi %>%
   filter(didAnswer) %>%
@@ -93,7 +183,10 @@ summary(ez_reaction_jitter$aov)
 library(lme4)
 lmer_reaction_jitter <- lmer(reactionTime ~ jitter + (1|user), data=jovi[jovi$didAnswer,])
 summary(lmer_reaction_jitter)
+report(lmer_reaction_jitter)
 
+library(lmerTest)
+lmer_reaction_jitter <- lmer(reactionTime ~ jitter + (1|user), data=jovi[jovi$didAnswer,])
 
 ## 
 plt1 <- ggplot(jovi[jovi$didAnswer, ], aes(reactionTime)) + geom_histogram()

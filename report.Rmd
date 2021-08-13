@@ -1,0 +1,75 @@
+---
+title: "Report of data"
+output: html_document
+---
+
+```{r}
+library(jsonlite)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(report)
+library(lmerTest)
+library(performance)
+
+load_jovi <- function(pth){
+  dat <- jsonlite::fromJSON(pth)
+  df_jovi <- dat$data %>%
+    extract(image, into=c("jitter"), regex="jit([0-9]+)",
+            remove = FALSE, convert = TRUE) %>%
+    mutate(user_id = dat$id)
+  return(df_jovi)
+}
+
+jovi <- data.frame()
+for(pth in list.files("data/jovi/", full.names = TRUE)){
+  df <- load_jovi(pth)
+  jovi <- rbind(jovi, df)
+}
+```
+
+```{r preprocessing}
+jovi_filtered <- jovi %>%
+  filter(reactionTime < 2000)
+
+jovi_filtered <- jovi_filtered %>%
+  filter(!is.na(jitter), !is.na(correctAnswer))
+
+```
+
+```{r}
+lm_reaction_jitter <- lm(reactionTime ~ jitter, data = jovi_filtered)
+
+lm_reaction_jitter_correct <- jovi_filtered %>%
+  filter(correctAnswer) %>%
+  with(lm(reactionTime ~ jitter, data = .))
+
+lm_reaction_jitter_correct_inter <- 
+  lm(reactionTime ~ jitter*correctAnswer, data = jovi_filtered)
+
+# Linear mixed effect models
+lmer_reaction_jitter <- lmer(reactionTime ~ jitter + (1 | user_id),
+                             data = jovi_filtered)
+```
+
+I ran 4 models with the following performances
+
+```{r}
+compare_performance(lm_reaction_jitter, 
+                    lm_reaction_jitter_correct,
+                    lm_reaction_jitter_correct_inter,
+                    lmer_reaction_jitter)
+```
+
+Simple linear models
+```{r}
+report(lm_reaction_jitter)
+report(lm_reaction_jitter) %>%
+  as.data.frame()
+```
+
+```{r}
+report(lmer_reaction_jitter)
+report(lmer_reaction_jitter) %>%
+  as.data.frame()
+```

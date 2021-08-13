@@ -84,19 +84,38 @@ summary(lm_height_sport)
 source("functions/load-olympics.R")
 df_olympics <- load_olympics(-1)
 set.seed(2500)
-df_olympics <- sample_n(df_olympics, 5000)
-table(df_olympics$Sex)
+df_olympics <-  df_olympics %>%
+  filter(Year > 1990, Season == "Winter") %>%
+  sample_n(5000)
+
+lm_height_sport_sex <- glm(Height ~ Sport + Sex, data=df_olympics)
+summary(lm_height_sport_sex)
+summary(lm_height_sport)
 
 # glm for just weight 
+lm_weight_height <- glm(Weight ~ Height, data=df_olympics)
+summary(lm_weight_height)
 
 # glm for just Sex
+lm_weight_gender <- glm(Weight ~ Sex, data=df_olympics)
+summary(lm_weight_gender)
 
 # glm for just Height + Sex
+lm_weight_height_gender <- glm(Weight ~ Height + Sex, data=df_olympics)
+summary(lm_weight_height_gender)
 
 # glm for just Height*Sex
+ggplot(df_olympics, aes(Height, Weight, color =Sex)) + geom_point() + geom_smooth(method = "lm")
+lm_weight_height_gender_inter <- glm(Weight ~ Height*Sex, data=df_olympics) 
+lm_weight_height_gender_inter <- glm(Weight ~ Height + Sex + Height:Sex,
+                                     data=df_olympics) #the same
+summary(lm_weight_height_gender_inter)
 
 # compare_performance()
+compare_performance(lm_weight_height, lm_weight_height_gender,
+                    lm_weight_gender, lm_weight_height_gender_inter)
 
+t.test(Height ~ Sex, data=df_olympics)
 ## Sex seems not to be adding much, why?
 
 # what about sport?
